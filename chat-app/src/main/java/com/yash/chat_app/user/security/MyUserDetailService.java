@@ -1,8 +1,7 @@
-package com.yash.chat_app.auth;
+package com.yash.chat_app.user.security;
 
 import com.yash.chat_app.user.User;
-import com.yash.chat_app.user.UserPrincipal;
-import com.yash.chat_app.user.UserRepo;
+import com.yash.chat_app.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.yash.chat_app.auth;
+package com.yash.chat_app.auth.dto;
 
 public record RegistrationRequest(
         String username,

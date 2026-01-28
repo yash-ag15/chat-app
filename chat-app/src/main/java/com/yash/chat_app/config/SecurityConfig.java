@@ -1,6 +1,7 @@
 package com.yash.chat_app.config;
 
-import com.yash.chat_app.auth.MyUserDetailService;
+import com.yash.chat_app.auth.jwt.JwtFilter;
+import com.yash.chat_app.user.security.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +14,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     @Autowired
     private MyUserDetailService userDetailService;
+    @Autowired
+    private JwtFilter jwtFilter;
 
 @Bean
 
@@ -38,10 +42,11 @@ public class SecurityConfig {
     httpSecurity.authorizeHttpRequests(request->request.
             requestMatchers("/auth/register","/auth/login")
             .permitAll()
-            .anyRequest()
-            .authenticated());
+            .anyRequest().hasRole("USER"));
 
-    httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+    httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
     return httpSecurity.build();
 }
 @Bean
