@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
+<<<<<<< HEAD
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -15,5 +16,11 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="chat-app" options="-parameters" />
     </option>
+=======
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="chat-app" target="21" />
+    </bytecodeTargetLevel>
+>>>>>>> 54ab6ec (hello)
   </component>
 </project>
