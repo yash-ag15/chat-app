@@ -1,5 +1,8 @@
 package com.yash.chat_app.friends.service;
 
+import com.yash.chat_app.exception.BadRequestException;
+import com.yash.chat_app.exception.DuplicateRequestException;
+import com.yash.chat_app.exception.UserNotFoundException;
 import com.yash.chat_app.friends.dto.FriendRequestResponse;
 import com.yash.chat_app.friends.entity.FriendRequest;
 import com.yash.chat_app.friends.entity.FriendRequestStatus;
@@ -33,12 +36,12 @@ public class FriendService {
 
         User receiver = userRepo.findByUsername(receiverName);
 
-        if(receiver==null)throw new RuntimeException("User not Found");
+        if(receiver==null)throw new UserNotFoundException("User not Found");
 
 
 
 if(sender.getId().equals(receiver.getId())){
-    throw new RuntimeException("Cannot Send Request to yourself");
+    throw new BadRequestException("Cannot Send Request to yourself");
 }
         boolean pendingExists =
                 friendsRepo.existsBySenderAndReceiverAndStatus(
@@ -49,12 +52,12 @@ if(sender.getId().equals(receiver.getId())){
                         );
 
         if (pendingExists) {
-            throw new RuntimeException("Friend request already pending");
+            throw new DuplicateRequestException("Friend request already pending");
         }
 
 
         if (friendsConnectedRepo.existsByUser1AndUser2OrUser1AndUser2(sender, receiver,receiver,sender)) {
-            throw new RuntimeException("Users are already friends");
+            throw new DuplicateRequestException("Users are already friends");
         }
 
 FriendRequest request=new FriendRequest();

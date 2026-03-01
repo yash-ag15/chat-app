@@ -6,11 +6,12 @@ import com.yash.chat_app.friends.service.FriendService;
 import com.yash.chat_app.user.User;
 import com.yash.chat_app.user.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:5175")
 @RestController
 @RequestMapping("friends")
 public class FriendsController {
@@ -20,11 +21,11 @@ public class FriendsController {
 
 
     @PostMapping("/requests/{receiverName}")
-    public String sendRequest(@PathVariable String receiverName, Authentication authentication){
+    public ResponseEntity<String> sendRequest(@PathVariable String receiverName, Authentication authentication){
         UserPrincipal userPrincipal=(UserPrincipal)authentication.getPrincipal();
         User sender =userPrincipal.getUser();
         friendService.sendRequest(sender,receiverName);
-return "Request Send";
+return ResponseEntity.ok("Request Send");
 
     }
     @GetMapping("/requests")
@@ -37,19 +38,19 @@ return "Request Send";
     }
 
     @PutMapping("/request/accept/{requestId}")
-    public String acceptRequest(@PathVariable Long requestId,Authentication authentication){
+    public ResponseEntity<String> acceptRequest(@PathVariable Long requestId,Authentication authentication){
         UserPrincipal userPrincipal=(UserPrincipal)authentication.getPrincipal();
         User currentUser =userPrincipal.getUser();
         friendService.acceptRequest(currentUser,requestId);
-        return "Request Accepted";
+        return ResponseEntity.ok("Request Accepted");
     }
 
     @PutMapping("/request/reject/{requestId}")
-    public String rejectRequest(@PathVariable Long requestId,Authentication authentication){
+    public ResponseEntity<String> rejectRequest(@PathVariable Long requestId, Authentication authentication){
         UserPrincipal userPrincipal=(UserPrincipal)authentication.getPrincipal();
         User currentUser =userPrincipal.getUser();
         friendService.rejectRequest(currentUser,requestId);
-        return "Request Rejected";
+        return ResponseEntity.ok("Request Rejected");
     }
 
 

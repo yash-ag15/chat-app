@@ -22,4 +22,5 @@ public class User {
 
     private String role;
 
+   private String about;
 }

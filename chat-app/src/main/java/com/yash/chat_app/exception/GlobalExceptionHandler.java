@@ -18,11 +18,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(ex.getMessage());
     }
 
-//    // 🔹 401 - JWT invalid
-//    @ExceptionHandler(JwtInvalidException.class)
-//    public ResponseEntity<String> handleJwt(JwtInvalidException ex) {
-//        return ResponseEntity.status(401).body(ex.getMessage());
-//    }
+    // 🔹 401 - JWT invalid
+    @ExceptionHandler(JwtInvalidException.class)
+    public ResponseEntity<String> handleJwt(JwtInvalidException ex) {
+        return ResponseEntity.status(401).body(ex.getMessage());
+    }
 
 //     🔹 400 - Bad request
     @ExceptionHandler(BadRequestException.class)

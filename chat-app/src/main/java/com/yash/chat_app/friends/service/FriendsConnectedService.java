@@ -6,6 +6,8 @@ import com.yash.chat_app.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 public class FriendsConnectedService {
     @Autowired
@@ -16,7 +18,7 @@ public class FriendsConnectedService {
         FriendConnected friendConnected=new FriendConnected();
         friendConnected.setUser1(sender);
         friendConnected.setUser2(receiver);
-
+friendConnected.setCreatedAt(Instant.now());
         friendsConnectedRepo.save(friendConnected);
 
     }

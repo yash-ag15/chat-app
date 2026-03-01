@@ -1,5 +1,6 @@
 package com.yash.chat_app.auth.jwt;
 
+import com.yash.chat_app.exception.JwtInvalidException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,39 +18,73 @@ import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-@Autowired
-private  JWTService jwtService;
+
+    @Autowired
+    private JWTService jwtService;
+
     @Autowired
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        String authHeader=request.getHeader("Authorization");
+        try {
 
-        String token=null;
-        String email=null;
+            String authHeader = request.getHeader("Authorization");
 
-        if(authHeader!=null&&authHeader.startsWith("Bearer ")){
+            String token = null;
+            String email = null;
 
-            token=authHeader.substring(7);
-            email= jwtService.extractEmail(token);
+          
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
 
-
-        }
-        if(email!=null&& SecurityContextHolder.getContext().getAuthentication()==null){
-
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(email);
-            if(jwtService.isTokenValid(token,userDetails)){
-
-                UsernamePasswordAuthenticationToken authToken=new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                try {
+                    email = jwtService.extractEmail(token);
+                } catch (Exception e) {
+                    throw new JwtInvalidException("Session expired");
+                }
             }
-        }
-        filterChain.doFilter(request,response);
 
+
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(email);
+
+                if (jwtService.isTokenValid(token, userDetails)) {
+
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                } else {
+                    throw new JwtInvalidException("Session expired");
+                }
+            }
+
+            // 🔹 Continue request
+            filterChain.doFilter(request, response);
+
+        } catch (JwtInvalidException ex) {
+
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+
+            response.getWriter().write(ex.getMessage());
+        }
     }
 }
