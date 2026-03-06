@@ -24,8 +24,7 @@ public class Message {
 
     private Instant sentAt = Instant.now();
 
-    @Enumerated(EnumType.STRING)
-    private MessageStatus status;
+
 
 
 }
