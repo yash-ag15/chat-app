@@ -1,5 +1,6 @@
 package com.yash.chat_app.chats.service;
 
+import com.yash.chat_app.chats.dto.AddMemberRequest;
 import com.yash.chat_app.chats.dto.ChatResponse;
 import com.yash.chat_app.chats.dto.MessageResponse;
 import com.yash.chat_app.chats.entity.Chat;
@@ -9,6 +10,10 @@ import com.yash.chat_app.chats.entity.Roles;
 import com.yash.chat_app.chats.repo.ChatMemberRepo;
 import com.yash.chat_app.chats.repo.ChatRepo;
 import com.yash.chat_app.chats.repo.MessageRepo;
+import com.yash.chat_app.exception.BadRequestException;
+import com.yash.chat_app.exception.UserNotFoundException;
+import com.yash.chat_app.friends.entity.FriendConnected;
+import com.yash.chat_app.friends.repo.FriendsConnectedRepo;
 import com.yash.chat_app.user.User;
 import com.yash.chat_app.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +41,10 @@ public class ChatService {
 
     @Autowired
     MessageRepo messageRepo;
-    public Chat getPrivateChat(User currUser, String username) {
+
+    @Autowired
+    FriendsConnectedRepo friendsConnectedRepo;
+    public void makePrivateChat(User currUser, String username) {
 
         User receiver = userRepo.findByUsername(username);
 
@@ -47,7 +55,7 @@ public class ChatService {
         Optional<Chat> containChat = chatRepo.findPrivateChat(currUser, receiver);
 
         if (containChat.isPresent()) {
-            return containChat.get();
+          throw new RuntimeException("Chat Already exist");
         }
 
         Chat chat = new Chat();
@@ -68,7 +76,7 @@ public class ChatService {
         memberRepo.save(chatMember1);
         memberRepo.save(chatMember2);
 
-        return chat;
+
     }
 
     public List<ChatResponse> getAllChat(User user) {
@@ -81,9 +89,32 @@ public class ChatService {
 
             Chat chat = m.getChat();
 
+            String chatName;
+
+
+            if (chat.isGroup()) {
+                chatName = chat.getName();
+            } else {
+
+                List<ChatMember> chatMembers = memberRepo.findByChat(chat);
+
+                chatName = null;
+
+                for (ChatMember cm : chatMembers) {
+
+                    if (!cm.getUser().getId().equals(user.getId())) {
+                        chatName = cm.getUser().getUsername();
+                        break;
+                    }
+                }
+            }
+
 
             Optional<Message> lastMsg =
                     messageRepo.findTopByChatIdOrderBySentAtDesc(chat.getId());
+if(lastMsg.isEmpty()&&!chat.isGroup()){
+    continue;
+}
 
             String lastMessage = null;
             Instant lastMessageTime = null;
@@ -96,6 +127,7 @@ public class ChatService {
             ChatResponse response = new ChatResponse(
                     chat.getId(),
                     chat.isGroup(),
+                    chatName,
                     chat.getCreatedAt(),
                     lastMessage,
                     lastMessageTime
@@ -129,8 +161,137 @@ public class ChatService {
                         m.getId(),
                         m.getSender().getUsername(),
                         m.getContent(),
-                        m.getSentAt()
+                        m.getSentAt(),
+                        chatId
+
                 )
         );
+    }
+
+    public List<ChatResponse> getAllChatStartingWith(User currentUser, String prefix) {
+
+        List<FriendConnected>list1=friendsConnectedRepo.findByUser1AndUser2_UsernameStartingWithIgnoreCase(currentUser,prefix);
+        List<FriendConnected>list2=friendsConnectedRepo.findByUser2AndUser1_UsernameStartingWithIgnoreCase(currentUser,prefix);
+        List<FriendConnected>friendConnected= new ArrayList<>();
+        friendConnected.addAll(list1);
+        friendConnected.addAll(list2);
+
+        List<ChatResponse> chatResponses = new ArrayList<>();
+
+        for (FriendConnected f : friendConnected) {
+
+            User friend;
+
+            if (f.getUser1().getId().equals(currentUser.getId())) {
+                friend = f.getUser2();
+            } else {
+                friend = f.getUser1();
+            }
+
+            Optional<Chat> chat = chatRepo.findPrivateChat(currentUser, friend);
+
+            if(chat.isEmpty()){
+                continue;
+            }
+            Chat chatEntity = chat.get();
+
+            Optional<Message> lastMsg =
+                    messageRepo.findTopByChatIdOrderBySentAtDesc(chatEntity.getId());
+
+            String lastMessage = null;
+            Instant lastMessageTime = null;
+
+            if (lastMsg.isPresent()) {
+                lastMessage = lastMsg.get().getContent();
+                lastMessageTime = lastMsg.get().getSentAt();
+            }
+
+            chatResponses.add(
+                    new ChatResponse(
+                            chatEntity.getId(),
+                            chatEntity.isGroup(),
+                            friend.getUsername(),
+                            chatEntity.getCreatedAt(),
+                            lastMessage,
+                            lastMessageTime
+                    )
+            );
+        }
+        return chatResponses;
+    }
+
+
+    public void createGroup(User user, String chatName, List<String> memberUserNames) {
+
+        Chat chat = new Chat();
+        chat.setGroup(true);
+        chat.setName(chatName);
+
+        chat = chatRepo.save(chat);
+
+
+        List<User> users = userRepo.findByUsernameIn(memberUserNames);
+
+        if (users.size() != memberUserNames.size()) {
+            throw new UserNotFoundException("One or more users do not exist");
+        }
+
+        List<ChatMember> members = new ArrayList<>();
+
+
+        ChatMember admin = new ChatMember();
+        admin.setRoles(Roles.ADMIN);
+        admin.setChat(chat);
+        admin.setUser(user);
+        members.add(admin);
+
+
+        for (User u : users) {
+            ChatMember chatMember = new ChatMember();
+            chatMember.setUser(u);
+            chatMember.setChat(chat);
+            chatMember.setRoles(Roles.MEMBER);
+            members.add(chatMember);
+        }
+
+
+        memberRepo.saveAll(members);
+    }
+
+
+   public void addMember(User user, Long chatId, AddMemberRequest addMemberRequest) {
+       Optional<Chat> chat =chatRepo.findById(chatId);
+       if(chat.isEmpty())
+           throw new RuntimeException("Chat Not found");
+
+        if(!memberRepo.existsByChatAndUserAndRoles(chat.get(),user,Roles.ADMIN)){
+            throw new BadRequestException("Only Admin can add the member");
+
+        }
+        List<User> users = userRepo.findByUsernameIn(addMemberRequest.memberUserNames());
+
+        if (users.size() != addMemberRequest.memberUserNames().size()) {
+            throw new UserNotFoundException("One or more users do not exist");
+        }
+
+        List<ChatMember> members = new ArrayList<>();
+
+
+        for (User u : users) {
+            if(memberRepo.existsByChatAndUser(chat.get(), u)){
+                throw new RuntimeException(u.getUsername()+" is already in the group");
+
+            }
+            ChatMember chatMember = new ChatMember();
+            chatMember.setUser(u);
+            chatMember.setChat(chat.get());
+            chatMember.setRoles(Roles.MEMBER);
+            members.add(chatMember);
+        }
+
+
+        memberRepo.saveAll(members);
+
+
     }
 }

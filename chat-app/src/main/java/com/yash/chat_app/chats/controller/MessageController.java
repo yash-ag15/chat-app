@@ -20,13 +20,13 @@ public class MessageController {
     @Autowired
     MessageService messageService;
 
-    @PostMapping
-    public Message sendMessage(Authentication authentication,
-                               @RequestBody MessageRequest messageRequest) {
-
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        User currUser = userPrincipal.getUser();
-
-        return messageService.sendMessage(currUser, messageRequest);
-    }
+//    @PostMapping
+//    public Message sendMessage(Authentication authentication,
+//                               @RequestBody MessageRequest messageRequest) {
+//
+//        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+//        User currUser = userPrincipal.getUser();
+//
+//        return messageService.sendMessage(currUser, messageRequest);
+//    }
 }

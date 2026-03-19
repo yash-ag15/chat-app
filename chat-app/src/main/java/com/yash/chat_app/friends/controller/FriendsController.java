@@ -1,5 +1,7 @@
 package com.yash.chat_app.friends.controller;
 
+import com.yash.chat_app.chats.dto.ChatResponse;
+import com.yash.chat_app.chats.service.ChatService;
 import com.yash.chat_app.friends.dto.FriendRequestResponse;
 import com.yash.chat_app.friends.entity.FriendRequest;
 import com.yash.chat_app.friends.service.FriendService;
@@ -18,7 +20,8 @@ public class FriendsController {
 
     @Autowired
     FriendService friendService;
-
+@Autowired
+    ChatService chatService;
 
     @PostMapping("/requests/{receiverName}")
     public ResponseEntity<String> sendRequest(@PathVariable String receiverName, Authentication authentication){
@@ -52,6 +55,15 @@ return ResponseEntity.ok("Request Send");
         friendService.rejectRequest(currentUser,requestId);
         return ResponseEntity.ok("Request Rejected");
     }
+@GetMapping("/search")
+    public List<ChatResponse>getAllChatStartingWith(Authentication authentication,@RequestParam String prefix){
+    UserPrincipal userPrincipal=(UserPrincipal)authentication.getPrincipal();
+    User currentUser =userPrincipal.getUser();
+    if(prefix == null || prefix.trim().isEmpty()){
+        return List.of();
+    }
+    return chatService.getAllChatStartingWith(currentUser,prefix);
 
+}
 
 }
