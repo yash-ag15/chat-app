@@ -42,6 +42,7 @@ public class SecurityConfig {
     httpSecurity.authorizeHttpRequests(request->request.
             requestMatchers("/auth/register","/auth/login")
             .permitAll()
+            .requestMatchers("/ws/**").permitAll()
             .anyRequest().hasRole("USER"));
 
     httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

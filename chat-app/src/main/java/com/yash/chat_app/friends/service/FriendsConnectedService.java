@@ -1,5 +1,6 @@
 package com.yash.chat_app.friends.service;
 
+import com.yash.chat_app.chats.service.ChatService;
 import com.yash.chat_app.friends.entity.FriendConnected;
 import com.yash.chat_app.friends.repo.FriendsConnectedRepo;
 import com.yash.chat_app.user.User;
@@ -12,6 +13,8 @@ import java.time.Instant;
 public class FriendsConnectedService {
     @Autowired
     FriendsConnectedRepo friendsConnectedRepo;
+@Autowired
+    ChatService chatService;
 
     public void makeFriends(User sender, User receiver) {
 
@@ -20,6 +23,8 @@ public class FriendsConnectedService {
         friendConnected.setUser2(receiver);
 friendConnected.setCreatedAt(Instant.now());
         friendsConnectedRepo.save(friendConnected);
+
+        chatService.makePrivateChat(sender,receiver.getUsername());
 
     }
 }

@@ -3,7 +3,6 @@ package com.yash.chat_app.chats.service;
 import com.yash.chat_app.chats.dto.MessageRequest;
 import com.yash.chat_app.chats.entity.Chat;
 import com.yash.chat_app.chats.entity.Message;
-import com.yash.chat_app.chats.entity.MessageStatus;
 import com.yash.chat_app.chats.repo.ChatMemberRepo;
 import com.yash.chat_app.chats.repo.ChatRepo;
 import com.yash.chat_app.chats.repo.MessageRepo;
@@ -38,30 +37,7 @@ public class MessageService {
     public Message sendMessage(User currUser, MessageRequest messageRequest) {
 
 
-        if (messageRequest.receiverName() != null) {
 
-            User receiver = userRepo.findByUsername(messageRequest.receiverName());
-
-            if (receiver == null) {
-                throw new RuntimeException("User not found");
-            }
-
-            boolean friendExist =
-                    fcRepo.existsByUser1AndUser2OrUser1AndUser2(currUser, receiver, receiver, currUser);
-
-            if (!friendExist) {
-                throw new RuntimeException("Users are not friends");
-            }
-
-            Chat chat = chatService.getPrivateChat(currUser, messageRequest.receiverName());
-
-            Message message = new Message();
-            message.setChat(chat);
-            message.setContent(messageRequest.content());
-            message.setSender(currUser);
-
-            return messageRepo.save(message);
-        }
 
 
         Optional<Chat> chatOptional = chatRepo.findById(messageRequest.chatId());

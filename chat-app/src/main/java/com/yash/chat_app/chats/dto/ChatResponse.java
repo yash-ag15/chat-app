@@ -5,6 +5,7 @@ import java.time.Instant;
 public record ChatResponse(
         Long chatId,
         boolean isGroup,
+        String chatName,
         Instant createdAt,
         String lastMessage,
         Instant lastMessageTime
