@@ -1,6 +1,7 @@
 package com.yash.chat_app.config;
 
 import com.yash.chat_app.auth.jwt.JWTService;
+import com.yash.chat_app.user.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -42,6 +43,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic");
         registry.setApplicationDestinationPrefixes("/app");
+
     }
 
     @Override
@@ -75,6 +77,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                     if (sessionAttributes != null) {
                         sessionAttributes.put(WS_AUTH_ATTR, auth);
+
+                        UserPrincipal userPrincipal=(UserPrincipal)auth.getPrincipal();
+                        String userName=userPrincipal.getUser().getUsername();
+                        sessionAttributes.put("username",userName);
                     }
 
                 } else if (accessor.getUser() == null && sessionAttributes != null) {

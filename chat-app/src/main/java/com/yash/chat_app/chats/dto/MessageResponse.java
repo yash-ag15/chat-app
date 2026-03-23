@@ -7,6 +7,7 @@ public record MessageResponse(
         String senderName,
         String content,
         Instant sentAt,
-        Long chatId
+        Long chatId,
+        String status
 ) {
 }

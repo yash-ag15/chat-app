@@ -162,7 +162,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                         m.getSender().getUsername(),
                         m.getContent(),
                         m.getSentAt(),
-                        chatId
+                        chatId,
+                        m.getStatus().name()
 
                 )
         );

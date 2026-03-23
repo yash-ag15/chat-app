@@ -3,6 +3,7 @@ package com.yash.chat_app.chats.service;
 import com.yash.chat_app.chats.dto.MessageRequest;
 import com.yash.chat_app.chats.entity.Chat;
 import com.yash.chat_app.chats.entity.Message;
+import com.yash.chat_app.chats.entity.MessageStatus;
 import com.yash.chat_app.chats.repo.ChatMemberRepo;
 import com.yash.chat_app.chats.repo.ChatRepo;
 import com.yash.chat_app.chats.repo.MessageRepo;
@@ -58,6 +59,11 @@ public class MessageService {
         message.setSender(currUser);
         message.setContent(messageRequest.content());
         message.setChat(chat);
+        if (!chat.isGroup()) {
+            message.setStatus(MessageStatus.SENT);
+        } else {
+            message.setStatus(null);
+        }
 
         return messageRepo.save(message);
     }
