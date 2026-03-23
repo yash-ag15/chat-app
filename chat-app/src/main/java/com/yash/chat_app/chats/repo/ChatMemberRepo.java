@@ -5,6 +5,8 @@ import com.yash.chat_app.chats.entity.ChatMember;
 import com.yash.chat_app.chats.entity.Roles;
 import com.yash.chat_app.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -16,4 +18,11 @@ public interface ChatMemberRepo extends JpaRepository<ChatMember,Long> {
     List<ChatMember> findByChat(Chat chat);
 
     boolean existsByChatAndUserAndRoles(Chat chat, User user, Roles roles);
+
+    @Query("""
+    SELECT cm FROM ChatMember cm
+    JOIN FETCH cm.user
+    WHERE cm.chat = :chat
+""")
+    List<ChatMember> findByChatWithUser(@Param("chat") Chat chat);
 }
