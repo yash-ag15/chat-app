@@ -27,5 +27,7 @@ public class Message {
     @Enumerated(EnumType.STRING)
     private MessageStatus status;
 
+    private String imageUrl;
+
 
 }

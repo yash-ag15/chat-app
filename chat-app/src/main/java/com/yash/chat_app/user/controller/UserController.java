@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin(origins = "http://localhost:5175")
 @RestController
@@ -22,18 +23,21 @@ public class UserController {
         User user=userPrincipal.getUser();
        UserAuthResponse userAuthResponse=new UserAuthResponse(user.getId(),
                user.getUsername(),
-               user.getEmail(),user.getAbout());
+               user.getEmail(),user.getAbout(),
+               user.getProfilePhotoUrl());
        return userAuthResponse;
 
 
     }
     @Autowired
     UserService userService;
-    @PutMapping("me")
-    public UserAuthResponse me(Authentication authentication , @RequestBody UserEditRequest editRequest){
+    @PutMapping(value = "/me", consumes = "multipart/form-data")
+    public UserAuthResponse me(Authentication authentication ,  @RequestPart("user") UserEditRequest editRequest,
+                               @RequestPart(value = "file", required = false) MultipartFile file){
         UserPrincipal userPrincipal=(UserPrincipal)authentication.getPrincipal();
         User user=userPrincipal.getUser();
-        UserAuthResponse authResponse= userService.editProfile(editRequest,user.getEmail());
+        UserAuthResponse authResponse= userService.editProfile(editRequest,user.getEmail()
+        ,file);
         return authResponse;
     }
 }

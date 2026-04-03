@@ -64,6 +64,7 @@ public class MessageService {
         } else {
             message.setStatus(null);
         }
+        message.setImageUrl(messageRequest.imageUrl());
 
         return messageRepo.save(message);
     }
