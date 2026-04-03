@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +74,9 @@ public class ChatWebSocketController {
                 savedMessage.getContent(),
                 savedMessage.getSentAt(),
                 savedMessage.getChat().getId(),
-                status
+                status,
+                savedMessage.getImageUrl()
+
 
         );
 
@@ -88,11 +91,17 @@ public class ChatWebSocketController {
 
             User user = chatMember.getUser();
 
-            Map<String, Object> payload = Map.of(
-                    "chatId", savedMessage.getChat().getId(),
-                    "lastMessage", savedMessage.getContent(),
-                    "lastMessageTime", savedMessage.getSentAt()
-            );
+            Map<String, Object> payload = new HashMap<>();
+
+            payload.put("chatId", savedMessage.getChat().getId());
+            payload.put("lastMessage", savedMessage.getContent());
+            payload.put("lastMessageTime", savedMessage.getSentAt());
+            payload.put("senderName", sender.getEmail());
+            payload.put("sender", sender.getUsername());
+
+            if (savedMessage.getImageUrl() != null) {
+                payload.put("imageUrl", savedMessage.getImageUrl());
+            }
 
 
 

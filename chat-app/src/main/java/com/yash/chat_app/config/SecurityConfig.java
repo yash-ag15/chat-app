@@ -43,6 +43,7 @@ public class SecurityConfig {
             requestMatchers("/auth/register","/auth/login")
             .permitAll()
             .requestMatchers("/ws/**").permitAll()
+
             .anyRequest().hasRole("USER"));
 
     httpSecurity.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

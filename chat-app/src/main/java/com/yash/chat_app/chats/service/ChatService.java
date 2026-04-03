@@ -90,7 +90,7 @@ public class ChatService {
             Chat chat = m.getChat();
 
             String chatName;
-
+String profilePhotoUrl=null;
 
             if (chat.isGroup()) {
                 chatName = chat.getName();
@@ -104,6 +104,7 @@ public class ChatService {
 
                     if (!cm.getUser().getId().equals(user.getId())) {
                         chatName = cm.getUser().getUsername();
+                        profilePhotoUrl=cm.getUser().getProfilePhotoUrl();
                         break;
                     }
                 }
@@ -130,7 +131,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                     chatName,
                     chat.getCreatedAt(),
                     lastMessage,
-                    lastMessageTime
+                    lastMessageTime,
+                    profilePhotoUrl
             );
 
             chats.add(response);
@@ -163,7 +165,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                         m.getContent(),
                         m.getSentAt(),
                         chatId,
-                        m.getStatus().name()
+                        m.getStatus().name(),
+                        m.getImageUrl()
 
                 )
         );
@@ -182,11 +185,13 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
         for (FriendConnected f : friendConnected) {
 
             User friend;
-
+            String profilePhotoUrl=null;
             if (f.getUser1().getId().equals(currentUser.getId())) {
                 friend = f.getUser2();
+                profilePhotoUrl=f.getUser2().getProfilePhotoUrl();
             } else {
                 friend = f.getUser1();
+                profilePhotoUrl=f.getUser1().getProfilePhotoUrl();
             }
 
             Optional<Chat> chat = chatRepo.findPrivateChat(currentUser, friend);
@@ -214,7 +219,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                             friend.getUsername(),
                             chatEntity.getCreatedAt(),
                             lastMessage,
-                            lastMessageTime
+                            lastMessageTime,
+                            profilePhotoUrl
                     )
             );
         }

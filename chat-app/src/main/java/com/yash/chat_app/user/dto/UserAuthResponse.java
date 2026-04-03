@@ -4,7 +4,8 @@ public record UserAuthResponse(
         Long id,
         String userName,
         String email,
-String about
+String about,
+        String profilePhotoUrl
 
 ) {
 }

@@ -23,4 +23,8 @@ public class User {
     private String role;
 
    private String about;
+
+    private String profilePhotoUrl;
+
+    private String cloudinaryPublicId;
 }

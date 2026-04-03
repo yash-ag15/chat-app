@@ -8,6 +8,7 @@ public record ChatResponse(
         String chatName,
         Instant createdAt,
         String lastMessage,
-        Instant lastMessageTime
+        Instant lastMessageTime,
+        String profilePhotoUrl
 ) {
 }
