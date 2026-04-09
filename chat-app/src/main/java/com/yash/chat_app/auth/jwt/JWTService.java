@@ -20,12 +20,12 @@ public class JWTService {
     private String jwtSecret;
 
     public String generateToken(String email) {
+     HashMap<String , Object>claims=new HashMap<>();
 
-        HashMap<String , Object>claims=new HashMap<>();
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 *30))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7))
                 .signWith(getKey(), Jwts.SIG.HS256)
                 .compact();
     }

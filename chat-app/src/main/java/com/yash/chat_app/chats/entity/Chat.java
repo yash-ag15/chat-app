@@ -18,7 +18,7 @@ public class Chat {
 
     private String name;
     private boolean isGroup;
-
+    private String groupPhotoUrl;
     private Instant createdAt = Instant.now();
 
 }
