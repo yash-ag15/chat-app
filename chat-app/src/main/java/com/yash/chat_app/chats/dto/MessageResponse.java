@@ -8,7 +8,7 @@ public record MessageResponse(
         String content,
         Instant sentAt,
         Long chatId,
-        String status,
+
         String imageUrl
 ) {
 }

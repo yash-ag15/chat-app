@@ -91,9 +91,11 @@ public class ChatService {
 
             String chatName;
 String profilePhotoUrl=null;
+Long otherUserId=null;
 
             if (chat.isGroup()) {
                 chatName = chat.getName();
+                profilePhotoUrl=chat.getGroupPhotoUrl();
             } else {
 
                 List<ChatMember> chatMembers = memberRepo.findByChat(chat);
@@ -105,6 +107,7 @@ String profilePhotoUrl=null;
                     if (!cm.getUser().getId().equals(user.getId())) {
                         chatName = cm.getUser().getUsername();
                         profilePhotoUrl=cm.getUser().getProfilePhotoUrl();
+                        otherUserId=cm.getUser().getId();
                         break;
                     }
                 }
@@ -132,7 +135,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                     chat.getCreatedAt(),
                     lastMessage,
                     lastMessageTime,
-                    profilePhotoUrl
+                    profilePhotoUrl,
+                    otherUserId
             );
 
             chats.add(response);
@@ -165,7 +169,7 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                         m.getContent(),
                         m.getSentAt(),
                         chatId,
-                        m.getStatus().name(),
+
                         m.getImageUrl()
 
                 )
@@ -186,12 +190,16 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
 
             User friend;
             String profilePhotoUrl=null;
+            Long otherUserId=null;
             if (f.getUser1().getId().equals(currentUser.getId())) {
                 friend = f.getUser2();
                 profilePhotoUrl=f.getUser2().getProfilePhotoUrl();
+                otherUserId=f.getUser2().getId();
             } else {
                 friend = f.getUser1();
                 profilePhotoUrl=f.getUser1().getProfilePhotoUrl();
+                otherUserId=f.getUser1().getId();
+
             }
 
             Optional<Chat> chat = chatRepo.findPrivateChat(currentUser, friend);
@@ -220,7 +228,8 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
                             chatEntity.getCreatedAt(),
                             lastMessage,
                             lastMessageTime,
-                            profilePhotoUrl
+                            profilePhotoUrl,
+                            otherUserId
                     )
             );
         }

@@ -74,7 +74,7 @@ public class ChatWebSocketController {
                 savedMessage.getContent(),
                 savedMessage.getSentAt(),
                 savedMessage.getChat().getId(),
-                status,
+
                 savedMessage.getImageUrl()
 
 

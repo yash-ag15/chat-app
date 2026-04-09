@@ -9,6 +9,7 @@ public record ChatResponse(
         Instant createdAt,
         String lastMessage,
         Instant lastMessageTime,
-        String profilePhotoUrl
+        String profilePhotoUrl,
+        Long otherUserId
 ) {
 }
