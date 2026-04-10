@@ -1,5 +1,6 @@
 package com.yash.chat_app.chats.service;
 
+import com.yash.chat_app.chats.controller.ChatWebSocketController;
 import com.yash.chat_app.chats.dto.AddMemberRequest;
 import com.yash.chat_app.chats.dto.ChatResponse;
 import com.yash.chat_app.chats.dto.MessageResponse;
@@ -20,12 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ChatService {
@@ -42,6 +42,9 @@ public class ChatService {
     @Autowired
     MessageRepo messageRepo;
 
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @Autowired
     FriendsConnectedRepo friendsConnectedRepo;
     public void makePrivateChat(User currUser, String username) {
@@ -272,6 +275,7 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
 
 
         memberRepo.saveAll(members);
+       broadcastNewGroup(chat,members);
     }
 
 
@@ -309,5 +313,29 @@ if(lastMsg.isEmpty()&&!chat.isGroup()){
         memberRepo.saveAll(members);
 
 
+
     }
+
+
+
+    private void broadcastNewGroup(Chat chat, List<ChatMember> members) {
+
+        for (ChatMember member : members) {
+
+            Map<String, Object> payload = new HashMap<>();
+
+            payload.put("chatId", chat.getId());
+            payload.put("chatName", chat.getName());
+            payload.put("isGroup", true);
+            payload.put("lastMessage", "");
+            payload.put("lastMessageTime", null);
+
+            messagingTemplate.convertAndSend(
+                    "/topic/chat-list/" + member.getUser().getEmail(),
+                    payload
+            );
+        }
+    }
+
+
 }

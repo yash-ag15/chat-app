@@ -4,6 +4,7 @@ import com.yash.chat_app.chats.dto.MessageRequest;
 import com.yash.chat_app.chats.dto.MessageResponse;
 import com.yash.chat_app.chats.dto.SeenRequest;
 import com.yash.chat_app.chats.dto.Typing;
+import com.yash.chat_app.chats.entity.Chat;
 import com.yash.chat_app.chats.entity.ChatMember;
 import com.yash.chat_app.chats.entity.Message;
 import com.yash.chat_app.chats.entity.MessageStatus;
@@ -21,9 +22,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 
 @Controller
 public class ChatWebSocketController {
@@ -42,6 +47,9 @@ public class ChatWebSocketController {
 
     @Autowired
     private MessageRepo messageRepo;
+
+    @Autowired
+    OnlineCurrUser onlineCurrUser;
 
     @MessageMapping("/chat.send")
     public void sendMessage(MessageRequest request,
@@ -98,6 +106,8 @@ public class ChatWebSocketController {
             payload.put("lastMessageTime", savedMessage.getSentAt());
             payload.put("senderName", sender.getEmail());
             payload.put("sender", sender.getUsername());
+            payload.put("chatName", savedMessage.getChat().getName());
+            payload.put("isGroup", savedMessage.getChat().isGroup());
 
             if (savedMessage.getImageUrl() != null) {
                 payload.put("imageUrl", savedMessage.getImageUrl());
@@ -133,6 +143,21 @@ public class ChatWebSocketController {
         }
 
         messagingTemplate.convertAndSend("/topic/typing/"+payload.chatId(),payload);
+    }
+
+    @MessageMapping("/presence.init")
+    public void initPresence(SimpMessageHeaderAccessor accessor) {
+
+        Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+        if (sessionAttributes == null) return;
+
+        String username = (String) sessionAttributes.get("username");
+        if (username == null) return;
+
+        messagingTemplate.convertAndSend(
+                "/topic/initial-presence/" + username,
+                new ArrayList<>(onlineCurrUser.getAll()
+        ));
     }
 
 //    @MessageMapping("/chat.seen")
